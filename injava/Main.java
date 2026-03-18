@@ -11,8 +11,13 @@ public class Main {
     public static void main(String[] args) {
         String directory;
         String actionInput;
+        int key = 0;
         
-        if (args.length >= 2) {
+        if (args.length >= 3) {
+            directory = args[0];
+            actionInput = args[1];
+            key = Integer.parseInt(args[2]);
+        } else if (args.length >= 2) {
             directory = args[0];
             actionInput = args[1];
         } else {
@@ -22,10 +27,14 @@ public class Main {
             
             System.out.println("Enter the action(Encrypt/Decrypt):");
             actionInput = scanner.nextLine();
+
+            System.out.println("Enter the numeric key:");
+            key = Integer.parseInt(scanner.nextLine());
             scanner.close();
         }
         
         Path dirPath = Paths.get(directory);
+        final int finalKey = key;
         
         if (Files.exists(dirPath) && Files.isDirectory(dirPath)) {
             ProcessManagement processManagement = new ProcessManagement();
@@ -36,7 +45,7 @@ public class Main {
                     String filePath = path.toAbsolutePath().toString();
                     
                     // Direct enqueue; file handled asynchronously by ProcessManagement
-                    Task task = new Task(filePath, action);
+                    Task task = new Task(filePath, action, finalKey);
                     
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     System.out.println("Entering the encryption/decryption process at " + formatter.format(new Date()));

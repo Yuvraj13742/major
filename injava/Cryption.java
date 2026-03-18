@@ -13,15 +13,7 @@ public class Cryption {
             return 1;
         }
 
-        ReadEnv env = new ReadEnv();
-        String envKey = env.getEnv();
-        int key;
-        try {
-            key = Integer.parseInt(envKey);
-        } catch (NumberFormatException e) {
-            System.err.println("Invalid key in .env, defaulting to 0.");
-            key = 0;
-        }
+        int key = task.getKey();
 
         try (RandomAccessFile file = new RandomAccessFile(task.getFilePath(), "rw")) {
             long length = file.length();

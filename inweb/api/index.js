@@ -13,12 +13,12 @@ app.use(cors());
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Orchestration engine calling the Java multithread executable
-const executeJava = (tempDir, action) => {
+const executeJava = (tempDir, action, key) => {
     return new Promise((resolve, reject) => {
         // Pointing dynamically to the neighboring injava directory
         const injavaPath = path.resolve(process.cwd(), '../injava');
         
-        const javaProcess = spawn('java', ['Main', tempDir, action], {
+        const javaProcess = spawn('java', ['Main', tempDir, action, `${key}`], {
             cwd: injavaPath
         });
 
@@ -47,7 +47,7 @@ app.post('/api/encrypt', upload.array('files'), async (req, res) => {
         }
 
         // Delegate execution to the Java ProcessManagement multithreaded engine
-        await executeJava(tempDir, 'ENCRYPT');
+        await executeJava(tempDir, 'ENCRYPT', passwordKey);
 
         res.setHeader('Content-Type', 'application/zip');
         res.setHeader('Content-Disposition', 'attachment; filename=encrypted-vault.zip');
@@ -92,7 +92,7 @@ app.post('/api/decrypt', upload.array('files'), async (req, res) => {
             }
         }
 
-        await executeJava(tempDir, 'DECRYPT');
+        await executeJava(tempDir, 'DECRYPT', passwordKey);
 
         res.setHeader('Content-Type', 'application/zip');
         res.setHeader('Content-Disposition', 'attachment; filename=decrypted-vault.zip');
@@ -111,7 +111,7 @@ app.post('/api/decrypt', upload.array('files'), async (req, res) => {
 
 // Serve the React Frontend UI statically alongside the API
 app.use(express.static(path.join(process.cwd(), 'dist')));
-app.get('*', (req, res) => {
+app.get('/(.*)', (req, res) => {
     if (!req.path.startsWith('/api/')) {
         res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
     }
