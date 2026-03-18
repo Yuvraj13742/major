@@ -22,6 +22,11 @@ const executeJava = (tempDir, action, key) => {
             cwd: injavaPath
         });
 
+        javaProcess.on('error', (err) => {
+            console.error('Spawn error:', err);
+            reject(err);
+        });
+
         javaProcess.stdout.on('data', (data) => console.log(`Java Info: ${data}`));
         javaProcess.stderr.on('data', (data) => console.error(`Java Log: ${data}`));
 
@@ -61,7 +66,7 @@ app.post('/api/encrypt', upload.array('files'), async (req, res) => {
         await fs.promises.rm(tempDir, { recursive: true, force: true });
     } catch (e) {
         console.error(e);
-        if (!res.headersSent) res.status(500).json({ error: 'Server error orchestrating Java' });
+        if (!res.headersSent) res.status(500).json({ error: `Server error orchestrating Java: ${e.message}` });
     }
 });
 
@@ -107,7 +112,7 @@ app.post('/api/decrypt', upload.array('files'), async (req, res) => {
         await fs.promises.rm(tempDir, { recursive: true, force: true });
     } catch (e) {
         console.error(e);
-        if (!res.headersSent) res.status(500).json({ error: 'Server error orchestrating Java' });
+        if (!res.headersSent) res.status(500).json({ error: `Server error orchestrating Java: ${e.message}` });
     }
 });
 
