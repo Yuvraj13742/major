@@ -59,11 +59,21 @@ app.post('/api/encrypt', upload.array('files'), async (req, res) => {
         res.setHeader('Content-Disposition', 'attachment; filename=encrypted-vault.zip');
 
         const archive = archiver('zip', { zlib: { level: 9 } });
+        
+        // Critical: catch stream crashes so Node doesn't global-crash
+        archive.on('error', (err) => console.error('Archiver leak caught:', err));
+
         archive.pipe(res);
         archive.directory(tempDir, false);
-        await archive.finalize();
+        
+        // We MUST NOT delete tempDir until the HTTP response has natively finished streaming!
+        res.on('finish', async () => {
+            try {
+                await fs.promises.rm(tempDir, { recursive: true, force: true });
+            } catch(e) {}
+        });
 
-        await fs.promises.rm(tempDir, { recursive: true, force: true });
+        await archive.finalize();
     } catch (e) {
         console.error(e);
         if (!res.headersSent) res.status(500).json({ error: `Server error orchestrating Java: ${e.message}` });
@@ -105,11 +115,20 @@ app.post('/api/decrypt', upload.array('files'), async (req, res) => {
         res.setHeader('Content-Disposition', 'attachment; filename=decrypted-vault.zip');
 
         const archive = archiver('zip', { zlib: { level: 9 } });
+        
+        // Catch asynchronous disk streaming leaks
+        archive.on('error', (err) => console.error('Archiver leak caught:', err));
+
         archive.pipe(res);
         archive.directory(tempDir, false);
-        await archive.finalize();
+        
+        res.on('finish', async () => {
+            try {
+                await fs.promises.rm(tempDir, { recursive: true, force: true });
+            } catch(e) {}
+        });
 
-        await fs.promises.rm(tempDir, { recursive: true, force: true });
+        await archive.finalize();
     } catch (e) {
         console.error(e);
         if (!res.headersSent) res.status(500).json({ error: `Server error orchestrating Java: ${e.message}` });
