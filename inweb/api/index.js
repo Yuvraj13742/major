@@ -111,9 +111,11 @@ app.post('/api/decrypt', upload.array('files'), async (req, res) => {
 
 // Serve the React Frontend UI statically alongside the API
 app.use(express.static(path.join(process.cwd(), 'dist')));
-app.get('/(.*)', (req, res) => {
+app.use((req, res, next) => {
     if (!req.path.startsWith('/api/')) {
         res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+    } else {
+        next();
     }
 });
 
