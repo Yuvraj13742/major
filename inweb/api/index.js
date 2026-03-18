@@ -36,6 +36,7 @@ app.post('/api/encrypt', upload.array('files'), async (req, res) => {
     try {
         if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No files uploaded.' });
 
+        const passwordKey = req.body.key || "0";
         const sessionID = Math.random().toString(36).substring(7);
         const tempDir = path.join(os.tmpdir(), `vaultx_${sessionID}`);
         
@@ -68,6 +69,7 @@ app.post('/api/decrypt', upload.array('files'), async (req, res) => {
     try {
         if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'No files uploaded.' });
 
+        const passwordKey = req.body.key || "0";
         const sessionID = Math.random().toString(36).substring(7);
         const tempDir = path.join(os.tmpdir(), `vaultx_dec_${sessionID}`);
         await fs.promises.mkdir(tempDir, { recursive: true });
