@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FolderLock, FolderOpen, UploadCloud, Loader2, KeyRound } from 'lucide-react';
+import { Routes, Route, Link } from 'react-router-dom';
+import About from './About';
 import './index.css';
 
-function App() {
+function Home() {
   const [files, setFiles] = useState([]);
   const [passwordKey, setPasswordKey] = useState("1");
   const [processing, setProcessing] = useState(false);
@@ -64,7 +66,7 @@ function App() {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <div className="header">
+        <div className="header" style={{ position: 'relative' }}>
           <motion.div
             animate={{ rotate: mode === 'ENCRYPT' ? 0 : 180 }}
             transition={{ type: "spring", stiffness: 100 }}
@@ -73,6 +75,9 @@ function App() {
           </motion.div>
           <h1>Vault<span className="accent">X</span></h1>
           <p>High-Performance Folder Engine</p>
+          <Link to="/about" style={{ position: 'absolute', top: '0', right: '0', textDecoration: 'none', color: 'var(--text-primary)', fontSize: '0.9rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            About
+          </Link>
         </div>
 
         <div className="controls">
@@ -200,6 +205,15 @@ function App() {
       <div className="blob blob-1"></div>
       <div className="blob blob-2"></div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+    </Routes>
   );
 }
 
